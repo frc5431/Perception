@@ -1,0 +1,90 @@
+[01/15/2017/ 00:53:51:511985]|GENERAL|:Started PERCEPTION Logger!
+[01/15/2017/ 00:53:51:514637]|KINECT|:Initializing Kinect device
+[01/15/2017/ 00:53:51:515170]|KINECT|:Device Serial: 018660741747
+[01/15/2017/ 00:53:51:727742]|KINECT|:Using pipeline!
+[01/15/2017/ 00:53:51:833956]|KINECT|:Setting Kinect frames
+[01/15/2017/ 00:53:51:918780]|KINECT|:Started the listener
+[01/15/2017/ 00:53:51:948252]|KINECT|:Starting rgb callback loop
+[01/15/2017/ 00:53:51:949687]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:950007]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:950092]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:950173]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:950245]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:950323]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:950398]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:950483]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:950567]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:950643]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:950697]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:950752]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:950827]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:950909]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:950987]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:951057]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:951113]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:951163]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:951222]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:951272]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:951321]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:951369]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:951416]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:951463]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:951511]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:951581]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:951632]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:951679]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:951726]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:951773]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:952095]|KINECT|:Starting ir callback loop
+[01/15/2017/ 00:53:51:952105]|KINECT|:Starting depth callback loop
+[01/15/2017/ 00:53:51:952184]|KINECT|:Started the frame updates and pulling!
+[01/15/2017/ 00:53:51:952277]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/alloc.cpp:52: error: (-4) Failed to allocate 14602199053888548 bytes in function OutOfMemoryError
+
+[01/15/2017/ 00:53:51:952409]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/matrix.cpp:433: error: (-215) u != 0 in function create
+
+[01/15/2017/ 00:54:00:619052]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/matrix.cpp:307: error: (-215) s >= 0 in function setSize
+
+[01/15/2017/ 00:54:06:685627]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/matrix.cpp:307: error: (-215) s >= 0 in function setSize
+
+[01/15/2017/ 00:54:07:656883]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/matrix.cpp:307: error: (-215) s >= 0 in function setSize
+
+[01/15/2017/ 00:54:09:920621]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/matrix.cpp:307: error: (-215) s >= 0 in function setSize
+
+[01/15/2017/ 00:54:15:386659]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/matrix.cpp:307: error: (-215) s >= 0 in function setSize
+
+[01/15/2017/ 00:54:16:585532]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/matrix.cpp:307: error: (-215) s >= 0 in function setSize
+
+[01/15/2017/ 00:54:38:904273]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/core/src/matrix.cpp:307: error: (-215) s >= 0 in function setSize
+
+[01/15/2017/ 00:54:46:549767]|KINECT|:(ERROR)-> Failed getting depth frame: /home/titan/opencv/modules/highgui/src/window.cpp:304: error: (-215) size.width>0 && size.height>0 in function imshow
+

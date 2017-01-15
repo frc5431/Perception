@@ -23,8 +23,7 @@
 */
 #include "../include/mjpgserver.hpp"
 
-MjpgServer::MjpgServer(int port)
-{
+MjpgServer::MjpgServer(int port) {
     this->port = port;
 }
 
@@ -60,7 +59,7 @@ void MjpgServer::setQuality(int quality)
 
 int MjpgServer::getQuality()
 {
-    return this->quality;
+    return (this->quality);
 }
 
 void MjpgServer::setFPS(int fps)
@@ -71,7 +70,7 @@ void MjpgServer::setFPS(int fps)
 int MjpgServer::getFPS()
 {
     boost::mutex::scoped_lock l(this->global_mutex);
-    return this->fps;
+    return (this->fps);
 }
 
 void MjpgServer::setResolution(int width, int height)
@@ -82,7 +81,7 @@ void MjpgServer::setResolution(int width, int height)
 
 int* MjpgServer::getResolution()
 {
-    return this->resized;
+    return (this->resized);
 }
 
 void MjpgServer::setSettle(int fps)
@@ -98,12 +97,12 @@ void MjpgServer::setMaxConnections(int connections)
 
 int MjpgServer::getMaxConnections()
 {
-    return this->maxconnections;
+    return (this->maxconnections);
 }
 
 int MjpgServer::getConnections()
 {
-    return this->connections;
+    return (this->connections);
 }
 
 void MjpgServer::capattach_in()
@@ -118,7 +117,7 @@ void MjpgServer::capattach_in()
     {
         cv::Mat frame;
         try {
-            if(!this->cap.read(frame)) return frame;
+            if(!this->cap.read(frame)) return (frame);
         }
         catch (std::exception& err)
         {
@@ -174,7 +173,7 @@ std::string MjpgServer::convertString()
         cv::imencode(".jpg", this->curframe, buff);
     }
     std::string content(buff.begin(), buff.end());
-    return content;
+    return (content);
 }
 
 void MjpgServer::handleJpg(asio::ip::tcp::socket &socket)

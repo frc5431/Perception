@@ -6,7 +6,11 @@
 
 //STANDARD C++ INCLUDES
 #include <iostream>
-//#include "kinect.hpp"
+
+//PERCEPTION INLCUDES
+#include "../include/kinect.hpp"
+#include "../include/log.hpp"
+
 //BOOST INCLUDES
 #include <boost/lexical_cast.hpp>
 
@@ -22,14 +26,69 @@
 #include <libfreenect2/logger.h>
 #include <signal.h>
 
-bool protonect_shutdown = false; // Whether the running application should shut down.
+//bool protonect_shutdown = false; // Whether the running application should shut down.
 
 
-void sigint_handler(int s) {
+/*void sigint_handler(int s) {
 	protonect_shutdown = true;
-}
+}*/
 
 int main() {
+	Logger::Init();
+
+	kinect::Kinect kinect;
+	kinect.loadKinect();
+
+	kinect.setFrames(KINECT_COLOR | KINECT_IR | KINECT_DEPTH);
+
+	/*while(1) {
+		cv::Mat color, ir, depth;
+
+		if(!kinect.pullAll()) {
+			continue;
+		}
+
+		color = kinect.getRGBMat();
+		ir = kinect.getIRMat();
+		depth = kinect.getDepthMat();
+
+		cv::imshow("color", color);
+		cv::imshow("ir", ir);
+		cv::imshow("depth", depth);
+
+		if(cv::waitKey(3) >= 0) break;
+
+		kinect.cleanFrames();
+	}*/
+
+	kinect.setFPS(30);
+
+	cv::namedWindow("rgb");
+
+	kinect.attachRGB([](cv::Mat rgbImage) {
+		//std::cout << "NEW FRAME" << std::endl;
+		cv::imshow("rgb", rgbImage);
+		cv::waitKey(1);
+	});
+
+	kinect.attachIR([](cv::Mat irImage) {
+
+	});
+
+	kinect.attachDepth([](cv::Mat depthImage) {
+
+	});
+
+	kinect.startLoop();
+
+	while(1) {
+
+	}
+
+	cv::destroyAllWindows();
+	Logger::Free();
+
+
 	/*if (freenect2.enumerateDevices() == 0) {
 		std::cout << "No device connected" << std::endl;
 		return -1;
@@ -63,7 +122,7 @@ int main() {
 	//Attach the multi frame listeners (For now one)
 	libfreenect2::SyncMultiFrameListener listener(
 			libfreenect2::Frame::Color | libfreenect2::Frame::Ir); // |*/
-	std::cout << "COLOR: " << libfreenect2::Frame::Depth << std::endl;
+//	std::cout << "COLOR: " << libfreenect2::Frame::Depth << std::endl;
 
 	/*//libfreenect2::Frame::Depth |
 	//libfreenect2::Frame::Ir);
@@ -127,5 +186,5 @@ int main() {
 
 	std::cout << "Finished perception!" << std::endl;
 	*/
-	return 0;
+	return (0);
 }
