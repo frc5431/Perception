@@ -11,8 +11,8 @@ OBJS = $(SRCS:.cpp=.o)
 
 LDFLAGS = -L/usr/local/lib -lboost_date_time -lboost_filesystem -lboost_iostreams \
 -lboost_serialization -lboost_system -lboost_log -lboost_thread -lboost_regex \
--lboost_python -lboost_locale -lboost_wave -lboost_random -lboost_mpi \
--lboost_coroutine -lboost_chrono -lboost_atomic -lboost_graph -lfreenect2 \
+-lboost_python -lboost_locale -lboost_wave -lboost_random -lboost_coroutine \
+-lboost_chrono -lboost_atomic -lboost_graph -lfreenect2 \
 -lfreenect2-openni2 -lopencv_shape -lopencv_stitching -lopencv_objdetect \
 -lopencv_superres -lopencv_videostab -lopencv_calib3d -lopencv_features2d \
 -lopencv_highgui -lopencv_videoio -lopencv_imgcodecs -lopencv_video -lopencv_photo \
