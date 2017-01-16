@@ -10,15 +10,27 @@
 
 namespace kinect {
 
+bool runKinectThread = true;
+
+void kinectExit( int signum ) {
+	std::cout << "Exiting Perception!" << signum << std::endl;
+	runKinectThread = false;
+	boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
+	exit(signum);
+}
+
 Kinect::Kinect() {
 	KLOG("Initializing Kinect device");
 
 	this->__fps = 30;
-	this->protonect_shutdown = true;
 	this->__is_init = false;
 
 	this->listener = nullptr;
 	this->frames = new libfreenect2::FrameMap;
+
+	signal(SIGINT, kinectExit);
+	signal(SIGKILL, kinectExit);
+	signal(SIGABRT, kinectExit);
 }
 
 Kinect::~Kinect() {
@@ -31,7 +43,13 @@ Kinect::~Kinect() {
 	delete this->frames;
 	delete this->listener;
 
-	this->protonect_shutdown = true;
+	runKinectThread = false;
+
+	this->__wait(300);
+	if(this->kinectThread != nullptr) {
+		this->kinectThread->interrupt();
+		delete this->kinectThread;
+	}
 
 	if(dev != nullptr) {
 		dev->stop();
@@ -63,8 +81,6 @@ void Kinect::loadKinect(){
 		if (this->dev == 0) {
 			KLOG("Failed to open Kinectv2 device");
 		}
-		//Attach signal to shutdown loop
-		this->protonect_shutdown = false; //Disable while loop below
 }
 
 void Kinect::setFrames(int frameType){
@@ -121,7 +137,7 @@ void Kinect::attachIR(_attach_t callback) {
 	this->irCallback = callback;
 }
 
-void Kinect::attachDepth(_attach_t callback) {
+void Kinect::attachDepth(std::function< void(DepthData*) > callback) {
 	this->depthCallback = callback;
 }
 
@@ -130,106 +146,56 @@ void Kinect::__wait(const long millis) {
 }
 
 
-void Kinect::__rgb_callback() {
-	KLOG("Starting rgb callback loop");
-	while(1) {
-		try {
-			
-			int fps = 30;
-		
-			{
-				this->mutex.lock();
-				cv::Mat rgb = this->rgbFrame;
-				fps = this->__fps;
-				this->mutex.unlock();
-
-				rgbCallback(rgb);
-			}
-			
-			__waitFPS(fps);
-		} catch(const std::exception &err) {
-			KLOG(SW("Failed getting depth frame: ") + err.what(), true);
-		}
-	}
+void Kinect::__rgb_callback(libfreenect2::Frame *rgb) {
+	cv::Mat rgbMat = cv::Mat(rgb->height, rgb->width, CV_8UC4, rgb->data);
+	rgbCallback(&rgbMat);
 }
 
-void Kinect::__ir_callback() {
-	KLOG("Starting ir callback loop");
-	while(1) {
-		try {
-			
-			int fps = 30;
-			
-			{
-				this->mutex.lock();
-				cv::Mat ir = this->irFrame;
-				fps = this->__fps;
-				this->mutex.unlock();
-
-				irCallback(ir);
-			}
-
-			__waitFPS(fps);
-		} catch(const std::exception &err) {
-			KLOG(SW("Failed getting depth frame: ") + err.what(), true);
-		}
-	}
+void Kinect::__ir_callback(libfreenect2::Frame *ir) {
+	cv::Mat irMat = cv::Mat(ir->height, ir->width, CV_32FC1, ir->data) / 4500.0f;
+	irCallback(&irMat);
 }
 
-/*
-void Kinect::__depth_callback() {
-	KLOG("Starting depth callback loop");
-	while(1) {
-		try {
-			int fps;
-
-			this->mutex.lock();
-			cv::Mat tempDepthMat = this->rgbMat;
-//			libfreenect2::Frame *depth = this->depthFrame;
-			fps = this->__fps;
-			this->mutex.unlock();
-
-//			depthCallback(cv::Mat(depth->height, depth->width, CV_32FC1, depth->data) / 4500.0f);
-			depthCallback(tempDepthMat / 4500.0f);
-
-			__waitFPS(fps);
-		} catch(const std::exception &err) {
-			KLOG(SW("Failed getting depth frame: ") + err.what(), true);
-		}
-	}
-}*/
+void Kinect::__depth_callback(libfreenect2::Frame *depth) {
+	struct kinect::DepthData depthData;
+	depthData.height = depth->height;
+	depthData.width = depth->width;
+	depthData.depthRaw = depth->data;
+	//cv::Mat depthMat = cv::Mat(depth->height, depth->width, CV_32FC1, depth->data) /4500.0f;
+	depthCallback(&depthData);
+}
 
 void Kinect::__framePulling() {
 	KLOG("Started the frame updates and pulling!");
-	while(1) {
+	while(runKinectThread) {
 		try {
-		
-			int fps = 25;
-		
-			{
-				this->mutex.lock();
-				this->pullAll(); //Pull the new frame
+			this->pullAll(); //Pull the new FrameMaps
 
-				libfreenect2::Frame 
-					*rgb = ((*this->frames)[libfreenect2::Frame::Color]),
-					*ir = ((*this->frames)[libfreenect2::Frame::Ir]);
-				//this->depthFrame = *((*this->frames)[libfreenect2::Frame::Depth]);
-			
-				this->rgbFrame = cv::Mat(rgb->height, rgb->width, CV_8UC4, rgb->data);
-				this->irFrame = (cv::Mat(ir->height, ir->width, CV_32FC1, ir->data) / 4500.0f);
-				//cv::Mat(depth->height, depth->width, CV_32FC1, depth->data);
-				//this->depthFrame = ((*this->frames)[this->rgbMat]);
+			//Get frames from framemap
+			libfreenect2::Frame
+				*rgb = ((*this->frames)[libfreenect2::Frame::Color]),
+				*ir = ((*this->frames)[libfreenect2::Frame::Ir]),
+				*depth = ((*this->frames)[libfreenect2::Frame::Depth]);
 
-				this->cleanFrames();
+			//Start callback threads
+			this->rgbThread = boost::thread(boost::bind(&Kinect::__rgb_callback, this, rgb));
+			this->irThread = boost::thread(boost::bind(&Kinect::__ir_callback, this, ir));
+			this->depthThread = boost::thread(boost::bind(&Kinect::__depth_callback, this, depth));
 
-				fps = this->__fps + KINECT_FRAME_OFFSET;
-				this->mutex.unlock();
-			}
+			//Join all frame threads
+			this->rgbThread.join();
+			this->irThread.join();
+			this->depthThread.join();
 
-			__waitFPS(fps);
+			this->cleanFrames();
 		} catch(const std::exception &err) {
 			KLOG(SW("Failed pulling new frame from the Kinect: ") + err.what(), true);
 		}
+	}
+
+	if(dev != nullptr) {
+		dev->stop();
+		dev->close();
 	}
 }
 
@@ -246,10 +212,7 @@ void inline Kinect::__waitFPS(long fps) {
 }
 
 void Kinect::startLoop() {
-	this->rgbThread = new boost::thread(boost::bind(&Kinect::__rgb_callback, this));
-	this->irThread = new boost::thread(boost::bind(&Kinect::__ir_callback, this));
-	//this->depthThread = new boost::thread(boost::bind(&Kinect::__depth_callback, this));
-
+	runKinectThread = true;
 	this->kinectThread = new boost::thread(boost::bind(&Kinect::__framePulling, this));
 }
 

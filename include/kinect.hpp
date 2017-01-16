@@ -17,6 +17,7 @@
 #include <string>
 #include <functional>
 #include <algorithm>
+#include <signal.h>
 
 //KINECT INCLUDES
 #include <libfreenect2/libfreenect2.hpp>
@@ -39,10 +40,15 @@
 #define KINECT_LOGTAG "KINECT"
 #define KINECT_FRAME_OFFSET 3 //Amount of frames to delay by on the
 
-typedef std::function< void(cv::Mat) > _attach_t;
+typedef std::function< void(cv::Mat*) > _attach_t;
 
 //kinect namespace
 namespace kinect {
+
+struct DepthData {
+	size_t width, height;
+	unsigned char *depthRaw;
+};
 
 class Kinect {
 public:
@@ -56,13 +62,10 @@ public:
 
 	void attachRGB(_attach_t);
 	void attachIR(_attach_t);
-	void attachDepth(_attach_t);
+	void attachDepth(std::function< void(DepthData*) >);
 
 	void setFPS(int);
 	void startLoop();
-
-	bool protonect_shutdown;
-	//static cv::Mat rgbmat, depthmat, depthmatUndistorted, irmat, rgbd, rgbd2;
 
 	template<typename T>
 	void KLOG(T, bool err=false);
@@ -71,18 +74,18 @@ protected:
 	bool __is_init;
 	int __fps;
 
-	_attach_t rgbCallback, irCallback, depthCallback;
+	_attach_t rgbCallback, irCallback;
+	std::function< void(DepthData*) > depthCallback;
 
-	void __rgb_callback();
-	void __ir_callback();
-	void __depth_callback();
 	void __wait(long);
 	long __FPS2millis(long);
 	void __waitFPS(long fps);
 	void __framePulling();
+	void __rgb_callback(libfreenect2::Frame *);
+	void __ir_callback(libfreenect2::Frame *);
+	void __depth_callback(libfreenect2::Frame *);
 
-	cv::Mat rgbFrame, irFrame, depthFrame;
-	boost::thread *rgbThread, *irThread, *depthThread, *kinectThread;
+	boost::thread rgbThread, irThread, depthThread, *kinectThread;
 	boost::mutex mutex;
 
 	libfreenect2::FrameMap *frames;

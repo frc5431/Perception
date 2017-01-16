@@ -65,18 +65,20 @@ int main() {
 
 	cv::namedWindow("rgb");
 
-	kinect.attachRGB([](cv::Mat rgbImage) {
+	kinect.attachRGB([](cv::Mat *rgbImage) {
 		//std::cout << "NEW FRAME" << std::endl;
-		cv::imshow("rgb", rgbImage);
+		cv::imshow("rgb", *rgbImage);
 		cv::waitKey(1);
 	});
 
-	kinect.attachIR([](cv::Mat irImage) {
-
+	kinect.attachIR([](cv::Mat *irImage) {
+		cv::imshow("ir", *irImage);
+		cv::waitKey(1);
 	});
 
-	kinect.attachDepth([](cv::Mat depthImage) {
-
+	kinect.attachDepth([](kinect::DepthData *depthData) {
+		//cv::imshow("depth", *depthImage);
+		//cv::waitKey(1);
 	});
 
 	kinect.startLoop();
