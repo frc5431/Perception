@@ -67,7 +67,7 @@ void Kinect::loadKinect(){
 		KLOG("Device Serial: " + serial);
 
 		if (!this->pipeline) {
-			this->pipeline = new libfreenect2::OpenGLPacketPipeline();
+			this->pipeline = new libfreenect2::OpenCLPacketPipeline();
 		}
 
 		if (this->pipeline) {
@@ -124,6 +124,10 @@ void Kinect::KLOG(T toLog, bool err) {
 	Logger::Log(SW(KINECT_LOGTAG).c_str(), SW(toLog), err);
 }
 
+char Kinect::getDepth(DepthData *data, int x, int y) {
+	return (data->depthRaw[x + (y * data->width)]);
+}
+
 /*
  * KINECT FRAME LISTENERS
  *
@@ -133,13 +137,13 @@ void Kinect::attachRGB(_attach_t callback) {
 	this->rgbCallback = callback;
 }
 
-void Kinect::attachIR(_attach_t callback) {
+void Kinect::attachIR(std::function< void(cv::Mat *, DepthData*) > callback) {
 	this->irCallback = callback;
 }
 
-void Kinect::attachDepth(std::function< void(DepthData*) > callback) {
+/*void Kinect::attachDepth(std::function< void(DepthData*) > callback) {
 	this->depthCallback = callback;
-}
+}*/
 
 void Kinect::__wait(const long millis) {
 	boost::this_thread::sleep_for(boost::chrono::milliseconds(millis));
@@ -151,19 +155,21 @@ void Kinect::__rgb_callback(libfreenect2::Frame *rgb) {
 	rgbCallback(&rgbMat);
 }
 
-void Kinect::__ir_callback(libfreenect2::Frame *ir) {
-	cv::Mat irMat = cv::Mat(ir->height, ir->width, CV_32FC1, ir->data) / 4500.0f;
-	irCallback(&irMat);
-}
-
-void Kinect::__depth_callback(libfreenect2::Frame *depth) {
+void Kinect::__ir_callback(libfreenect2::Frame *ir, libfreenect2::Frame *depth) {
 	struct kinect::DepthData depthData;
 	depthData.height = depth->height;
 	depthData.width = depth->width;
 	depthData.depthRaw = depth->data;
+
+	cv::Mat irMat = cv::Mat(ir->height, ir->width, CV_32FC1, ir->data) / 4500.0f;
+	irCallback(&irMat, &depthData);
+}
+
+/*void Kinect::__depth_callback(libfreenect2::Frame *depth) {
+
 	//cv::Mat depthMat = cv::Mat(depth->height, depth->width, CV_32FC1, depth->data) /4500.0f;
 	depthCallback(&depthData);
-}
+}*/
 
 void Kinect::__framePulling() {
 	KLOG("Started the frame updates and pulling!");
@@ -179,13 +185,13 @@ void Kinect::__framePulling() {
 
 			//Start callback threads
 			this->rgbThread = boost::thread(boost::bind(&Kinect::__rgb_callback, this, rgb));
-			this->irThread = boost::thread(boost::bind(&Kinect::__ir_callback, this, ir));
-			this->depthThread = boost::thread(boost::bind(&Kinect::__depth_callback, this, depth));
+			this->irThread = boost::thread(boost::bind(&Kinect::__ir_callback, this, ir, depth));
+			//this->depthThread = boost::thread(boost::bind(&Kinect::__depth_callback, this, depth));
 
 			//Join all frame threads
 			this->rgbThread.join();
 			this->irThread.join();
-			this->depthThread.join();
+			//this->depthThread.join();
 
 			this->cleanFrames();
 		} catch(const std::exception &err) {

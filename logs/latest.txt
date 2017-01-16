@@ -1,7 +1,7 @@
-[01/16/2017/ 19:48:13:987147]|GENERAL|:Started PERCEPTION Logger!
-[01/16/2017/ 19:48:13:990105]|KINECT|:Initializing Kinect device
-[01/16/2017/ 19:48:13:990536]|KINECT|:Device Serial: 018660741747
-[01/16/2017/ 19:48:14:195683]|KINECT|:Using pipeline!
-[01/16/2017/ 19:48:14:299570]|KINECT|:Setting Kinect frames
-[01/16/2017/ 19:48:14:643502]|KINECT|:Started the listener
-[01/16/2017/ 19:48:14:663077]|KINECT|:Started the frame updates and pulling!
+[01/16/2017/ 22:59:09:586739]|GENERAL|:Started PERCEPTION Logger!
+[01/16/2017/ 22:59:09:589574]|KINECT|:Initializing Kinect device
+[01/16/2017/ 22:59:09:589950]|KINECT|:Device Serial: 018660741747
+[01/16/2017/ 22:59:10:191018]|KINECT|:Using pipeline!
+[01/16/2017/ 22:59:10:294471]|KINECT|:Setting Kinect frames
+[01/16/2017/ 22:59:10:380471]|KINECT|:Started the listener
+[01/16/2017/ 22:59:10:409241]|KINECT|:Started the frame updates and pulling!

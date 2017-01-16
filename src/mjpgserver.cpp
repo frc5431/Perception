@@ -208,45 +208,49 @@ void MjpgServer::mainPullLoop()
     this->pullcap = true;
     mutex.unlock();
 
-    for(int test = 0; test < 3; test++)
-    {
-        mutex.lock();
-        try
-        {
-            this->pullframe();
-        }
-        catch(std::exception& err) {}
-        mutex.unlock();
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(50));
-    }
+    try {
+		for(int test = 0; test < 3; test++)
+		{
+			mutex.lock();
+			try
+			{
+				this->pullframe();
+			}
+			catch(std::exception& err) {}
+			mutex.unlock();
+			boost::this_thread::sleep_for(boost::chrono::milliseconds(50));
+		}
 
-    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-    std::chrono::high_resolution_clock::time_point now = start;
-    while(1)
-    {
-        now = std::chrono::high_resolution_clock::now();
-        float delta = std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count();
-        start = now;
-        float timepoint = 1000 / (float) (this->settlefps > 0) ?
-                          this->settlefps : (this->controlfps > 0) ?
-                          this->controlfps : 1000;
-        int sleepoint = 2;
-        if(delta < timepoint)
-        {
-            sleepoint = (((int) (timepoint - delta)) * 2) - 3;
-        }
-        boost::this_thread::sleep_for(boost::chrono::milliseconds(sleepoint));
-        mutex.lock();
-        try
-        {
-            this->curframe = this->pullframe();
-            if(!this->curframe.empty())
-                this->content = this->convertString();
-        }
-        catch(std::exception& pullerror) {
-            std::cerr << "Image pull error: " << pullerror.what() << std::endl;
-        }
-        mutex.unlock();
+		std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+		std::chrono::high_resolution_clock::time_point now = start;
+		while(1)
+		{
+			now = std::chrono::high_resolution_clock::now();
+			float delta = std::chrono::duration_cast<std::chrono::milliseconds>(now - start).count();
+			start = now;
+			float timepoint = 1000 / (float) (this->settlefps > 0) ?
+							  this->settlefps : (this->controlfps > 0) ?
+							  this->controlfps : 1000;
+			int sleepoint = 2;
+			if(delta < timepoint)
+			{
+				sleepoint = (((int) (timepoint - delta)) * 2) - 3;
+			}
+			boost::this_thread::sleep_for(boost::chrono::milliseconds(sleepoint));
+			mutex.lock();
+			try
+			{
+				this->curframe = this->pullframe();
+				if(!this->curframe.empty())
+					this->content = this->convertString();
+			}
+			catch(std::exception& pullerror) {
+				std::cerr << "Image pull error: " << pullerror.what() << std::endl;
+			}
+			mutex.unlock();
+		}
+    } catch(const std::exception &err) {
+    	std::cerr << "Got error: " << err.what() << std::endl;
     }
     mutex.lock();
     this->pullcap = false;

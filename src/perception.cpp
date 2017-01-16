@@ -10,6 +10,7 @@
 //PERCEPTION INLCUDES
 #include "../include/kinect.hpp"
 #include "../include/log.hpp"
+#include "../include/mjpgserver.hpp"
 
 //BOOST INCLUDES
 #include <boost/lexical_cast.hpp>
@@ -33,8 +34,18 @@
 	protonect_shutdown = true;
 }*/
 
+cv::Mat rgbMat;
+cv::Mat defaultMat = cv::imread("/vision/notconnected.png");
+
+cv::Mat pullFrame() {
+	if(rgbMat.empty()) return defaultMat;
+	return rgbMat;
+}
+
 int main() {
 	Logger::Init();
+
+
 
 	kinect::Kinect kinect;
 	kinect.loadKinect();
@@ -61,27 +72,52 @@ int main() {
 		kinect.cleanFrames();
 	}*/
 
-	kinect.setFPS(30);
+    MjpgServer server(8081); // Start server on pot 8081
+    server.setQuality(1); // Set jpeg quality to 1 (0 - 100)
+    server.setResolution(640, 320); // Set stream resolution to 1280x720
+    server.setFPS(30); // Set target fps to 15
+    server.setMaxConnections(3);
+    server.setName("Perception Server");
+	server.attach(pullFrame);
+
+    //kinect.setFPS(30);
 
 	cv::namedWindow("rgb");
 
 	kinect.attachRGB([](cv::Mat *rgbImage) {
 		//std::cout << "NEW FRAME" << std::endl;
+		//rgbMat = *rgbImage;
+		cv::resize(*rgbImage, *rgbImage, cv::Size(720, 480));
+		cv::flip(*rgbImage, *rgbImage, 1);
+
 		cv::imshow("rgb", *rgbImage);
 		cv::waitKey(1);
 	});
 
-	kinect.attachIR([](cv::Mat *irImage) {
-		cv::imshow("ir", *irImage);
+	kinect.attachIR([](cv::Mat *irImage, kinect::DepthData *depthData) {
+		cv::flip(*irImage, *irImage, 1);
+
+		cv::Mat gray;
+		cv::threshold(*irImage, gray, 100, 255, CV_THRESH_BINARY);
+
+		//cv::medianBlur(gray, gray, 3);
+
+		cv::imshow("ir", gray);
 		cv::waitKey(1);
+
+		std::cout << "Depth: " << depthData->getDepth(250, 250) << std::endl;
 	});
 
-	kinect.attachDepth([](kinect::DepthData *depthData) {
+	/*kinect.attachDepth([](kinect::DepthData *depthData) {
+		//boost::thread([=]() {
+		std::cout << "Depth: " << depthData->getDepth(250, 250) << std::endl;
+		//});
 		//cv::imshow("depth", *depthImage);
 		//cv::waitKey(1);
-	});
+	});*/
 
 	kinect.startLoop();
+    //server.run(); //Run stream forever (until fatal)
 
 	while(1) {
 
