@@ -50,9 +50,8 @@ struct DepthData {
 	size_t width, height;
 	unsigned char *depthRaw;
 
-	int getDepth(int x, int y) {
-		cv::Mat depth = (cv::Mat(height, width, CV_32FC1, depthRaw) / 4500.0f);
-		return (static_cast<int>(depth.at<float>(x, y) * 4500.0f));
+	int getDepth(cv::Mat *depth, int x, int y) {
+		return (static_cast<int>(depth->at<float>(x, y) * 4500.0f));
 	}
 };
 
@@ -67,7 +66,7 @@ public:
 	void cleanFrames();
 
 	void attachRGB(_attach_t);
-	void attachIR(std::function< void(cv::Mat *, DepthData *) >);
+	void attachIR(std::function< void(DepthData) >);
 	//void attachDepth(std::function< void(libfreenect2::Frame *, DepthData*) >);
 
 	void setFPS(int);
@@ -81,25 +80,28 @@ protected:
 	bool __is_init;
 	int __fps;
 
-	_attach_t rgbCallback; //, irCallback;
-	std::function< void(cv::Mat *, DepthData *) > irCallback;//depthCallback;
+	_attach_t rgbCallback; //, irCallback;	libfreenect2::Frame undistorted(512, 424, 4);
+	std::function< void(DepthData) > irCallback;//depthCallback;
 
 	void __wait(long);
 	long __FPS2millis(long);
 	void __waitFPS(long fps);
 	void __framePulling();
 	void __rgb_callback(libfreenect2::Frame *);
-	void __ir_callback(libfreenect2::Frame *, libfreenect2::Frame *);
+	void __depth_callback(libfreenect2::Frame *);
 	//void __depth_callback(libfreenect2::Frame *);
 
-	boost::thread rgbThread, irThread, *kinectThread; //depthThread
+	boost::thread rgbThread, depthThread, *kinectThread; //depthThread
 	boost::mutex mutex;
+
+	//ibfreenect2::Frame *undistorted, *registered;
 
 	libfreenect2::FrameMap *frames;
 	libfreenect2::Freenect2 freenect2;
 	libfreenect2::Freenect2Device *dev = nullptr;
 	libfreenect2::PacketPipeline *pipeline = nullptr;
 	libfreenect2::SyncMultiFrameListener *listener;
+	libfreenect2::Registration* registration;
 };
 
 } /* namespace kinect */
