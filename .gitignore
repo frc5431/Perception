@@ -28,5 +28,6 @@
 *.out
 *.app
 
-# Build folder
+# Perception temporary
 build/
+logs/
