@@ -1,3 +1,0 @@
-/root/git/Perception/build/CMakeFiles/edit_cache.dir
-/root/git/Perception/build/CMakeFiles/rebuild_cache.dir
-/root/git/Perception/build/CMakeFiles/perception.dir

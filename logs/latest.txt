@@ -1,7 +1,5 @@
-[01/22/2017/ 01:22:43:151805]|GENERAL|:Started PERCEPTION Logger!
-[01/22/2017/ 01:22:43:156747]|KINECT|:Initializing Kinect device
-[01/22/2017/ 01:22:43:157224]|KINECT|:Device Serial: 018660741747
-[01/22/2017/ 01:22:43:514270]|KINECT|:Using pipeline!
-[01/22/2017/ 01:22:43:637743]|KINECT|:Setting Kinect frames
-[01/22/2017/ 01:22:43:752279]|KINECT|:Started the listener
-[01/22/2017/ 01:22:43:821793]|KINECT|:Started the frame updates and pulling!
+[01/23/2017/ 21:04:59:089065]|GENERAL|:Started PERCEPTION Logger!
+[01/23/2017/ 21:04:59:089259]|PERCEP|:Starting vision network table
+[01/23/2017/ 21:04:59:094128]|KINECT|:Initializing Kinect device
+[01/23/2017/ 21:04:59:094264]|PERCEP|:Attempting to connect to the Kinect!
+[01/23/2017/ 21:04:59:095586]|KINECT|:Device Serial: 

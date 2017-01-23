@@ -8,7 +8,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_SOURCE_DIR}/bin")
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREAD ON)
 
-find_package(Boost 1.60.0 REQUIRED COMPONENTS date_time filesystem chrono thread atomic wave coroutine system iostreams serialization locale random)
+find_package(Boost 1.50.3 REQUIRED COMPONENTS date_time filesystem chrono thread atomic wave coroutine system iostreams serialization locale random)
 
 if (Boost_FOUND)
 include_directories(${Boost_INCLUDE_DIR})
