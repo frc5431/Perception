@@ -3,7 +3,7 @@
 echo "Installing basic components"
 
 sudo apt-get --yes --force-yes update
-sudo apt-get --yes --force-yes install build-essential cmake software-properties-common pkg-config
+sudo apt-get --yes --force-yes install build-essential git npm rsync sshpass cmake software-properties-common pkg-config
 
 echo "Installing java 8"
 
