@@ -12,6 +12,7 @@
 #include "../include/kinect.hpp"
 #include "../include/log.hpp"
 #include "../include/mjpgserver.hpp"
+#include "../include/processing.hpp"
 
 //BOOST INCLUDES
 #include <boost/lexical_cast.hpp>
@@ -60,7 +61,7 @@ float xSize = 512.0f, ySize = 424.0f;
 std::shared_ptr<NetworkTable> table;
 
 
-void onRGBFrame(cv::Mat *rgbImage) {
+void onColorFrame(cv::Mat *rgbImage) {
 	//std::cout << "NEW FRAME" << std::endl;
 	//rgbMat = *rgbImage;
 	/*cv::resize(*rgbImage, *rgbImage, cv::Size(720, 480));
@@ -76,93 +77,18 @@ void MLOG(T toLog, bool err = false) {
 }
 
 void onDepthFrame(kinect::DepthData depthData) {
-	cv::Mat depthMat = cv::Mat(depthData.height, depthData.width, CV_32FC1, depthData.depthRaw) /4500.0f, threshed;
-	cv::Mat converted;
+	cv::Mat depth, fixedDepth, preprocessed;
 
-	depthMat.convertTo(converted, CV_8UC3);
-	cv::threshold(converted, threshed, 0, 100, CV_THRESH_BINARY_INV);
-	//cv::GaussianBlur(threshed, threshed, cv::Size(5, 5), 1);
-	cv::medianBlur(threshed, threshed, 7);
+	processing::kinectDepth2Mat(depth, depthData, 4500.0f);
+	processing::kinectScalar(depth, fixedDepth);
 
-	int erosion_size = 1;
+	processing::preProcessing(fixedDepth, preprocessed);
 
-	cv::Mat eroder = cv::getStructuringElement(
-				cv::MORPH_ERODE, cv::Size( 2*erosion_size + 1,
-				2*erosion_size+1 ),cv::Point( erosion_size, erosion_size ));
+	std::vector<processing::Target> targets = std::vector<processing::Target>();
 
-	cv::erode(threshed, threshed, eroder);
+	processing::processFrame(preprocessed, depthData, targets);
 
-
-	std::vector<std::vector<cv::Point>> contours;
-	std::vector<cv::Vec4i> hierarchy;
-
-	cv::findContours(threshed, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
-
-	cv::Mat drawing = cv::Mat::zeros(threshed.size(), CV_8UC3);
-	int ind = 0;
-
-	for(std::vector<cv::Point> contour : contours) {
-
-		float area = cv::contourArea(contour);
-
-		if(area > 20 && area < 500) {
-			//std::cout << "NEW FRAME" << std::endl;
-			//rgbMat = *rgbImage;
-			/*cv::resize(*rgbImage, *rgbImage, cv::Size(720, 480));
-			cv::flip(*rgbImage, *rgbImage, 1);
-
-			cv::imshow("rgb", *rgbImage);
-			cv::waitKey(1);*/
-			std::vector<cv::Point> approx;
-			cv::approxPolyDP(contour, approx, 5, true);
-
-			float sides = approx.size();
-
-			if(sides > 2 && sides < 4) {
-
-				float length = cv::arcLength(contour, true);
-
-				if(length > 30 && length < 200) {
-
-					cv::Rect bound = cv::boundingRect(contour);
-
-					float targetX = static_cast<float>(bound.height) * 2.0f;
-
-					if(static_cast<float>(bound.width) >= targetX && bound.height < 50) {
-						cv::Moments mu = cv::moments(contour, false);
-
-						float x = (mu.m10 / mu.m00);
-						float y = ySize - (mu.m01 / mu.m00) ;
-
-						if(y > 250 && y < ySize - 10) {
-							std::cout << "SIDES: " << sides;
-							std::cout << " AREA: " << area;
-							std::cout << " LENGTH: " << length;
-							std::cout << " WIDTH: " << bound.width;
-							std::cout << " HEIGHT: " << bound.height;
-							std::cout << " X: " << x  << " Y: " << y << std::endl;
-
-							//table->PutNumber()
-
-							cv::Scalar color = cv::Scalar(255, 0, 0);
-							cv::drawContours(drawing, contours, ind, color, 2, 8, hierarchy, 0, cv::Point());
-						}
-					}
-				}
-			}
-		}
-
-		ind++;
-	}
-
-	//cv::circle(depthMat, cv::Point(200, 200), 5, cv::Scalar(1.0f, 1.0f, 1.0f), 2);
-
-	//std::cout << "DEPTH: " << depthData.getDepth(&depthMat, 200, 200) << std::endl;
-	cv::imshow("ir", threshed);
-	cv::imshow("contours", drawing);
-	cv::waitKey(1);
-
-	//std::cout << "Depth: " << depthData.getDepth(250, 250) << std::endl;
+	MLOG(SW("GOT ") + SW(targets.size()) + SW(" POSSIBLE TARGETS!"));
 }
 
 //Main code
@@ -194,8 +120,8 @@ int main() {
 	server.attach(pullFrame);*/
 
 	//Attach the frame callbacks
-	kinect.attachRGB(onRGBFrame);
-	kinect.attachIR(onDepthFrame);
+	kinect.attachRGB(onColorFrame);
+	kinect.attachDepth(onDepthFrame);
 
 	//Start the kinect loop
 	kinect.startLoop();

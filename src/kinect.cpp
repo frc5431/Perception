@@ -141,13 +141,9 @@ void Kinect::attachRGB(_attach_t callback) {
 	this->rgbCallback = callback;
 }
 
-void Kinect::attachIR(std::function< void(DepthData) > callback) {
+void Kinect::attachDepth(std::function< void(DepthData) > callback) {
 	this->irCallback = callback;
 }
-
-/*void Kinect::attachDepth(std::function< void(DepthData*) > callback) {
-	this->depthCallback = callback;
-}*/
 
 void Kinect::__wait(const long millis) {
 	boost::this_thread::sleep_for(boost::chrono::milliseconds(millis));

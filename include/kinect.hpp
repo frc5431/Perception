@@ -66,7 +66,7 @@ public:
 	void cleanFrames();
 
 	void attachRGB(_attach_t);
-	void attachIR(std::function< void(DepthData) >);
+	void attachDepth(std::function< void(DepthData) >);
 	//void attachDepth(std::function< void(libfreenect2::Frame *, DepthData*) >);
 
 	void setFPS(int);
