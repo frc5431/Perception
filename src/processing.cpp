@@ -42,8 +42,13 @@
 #define PROCESSING_LOOP_TAG			"proc_time" //Network table processing tag
 
 //PreProcessing definitions
-#define PROCESSING_MIN_THRESH 		0 //Minimum float converted value for the depth stream
-#define PROCESSING_MAX_THRESH 		100 //Maximum float converted value for the depth stream
+#define PROCESSING_MIN_THRESH_H 	36 //Minimum float converted value for the depth stream
+#define PROCESSING_MIN_THRESH_S 	0 //Maximum float converted value for the depth stream
+#define PROCESSING_MIN_THRESH_V		99
+
+#define PROCESSING_MAX_THRESH_H		180
+#define PROCESSING_MAX_THRESH_S		255
+#define PROCESSING_MAX_THRESH_V		255
 
 #define PROCESSING_MEDIAN_BLUR		7 //The median blur level (must be an odd number)
 #define PROCESSING_EROSION_SIZE		1 //The erosion size for target detection
@@ -68,11 +73,13 @@
 #define PROCESSING_MID_MIN_Y		(PROCESSING_CAMERA_HEIGHT / 2) //Minimum pixel height for contour to be in
 #define PROCESSING_MID_MAX_Y		(PROCESSING_CAMERA_HEIGHT - 20) //Maximium pixel height for contour to be in
 
-
+/*
 //Depth processing and checking
 #define PROCESSING_DEPTH_Y_OFFSET	-20 //Subtract 20 pixels from target center
 #define PROCESSING_DEPTH_MINIMUM	2000 //Minimum distance in millimeters to be from target
 #define PROCESSING_DEPTH_MAXIMUM	4500 //Maximum distance in millimeters to be from target
+*/
+
 
 namespace processing {
 
@@ -81,8 +88,12 @@ namespace processing {
 
 	//Settings for processing
 	unsigned int loop_time = PROCESSING_LOOP_TIME,
-				 threshMin = PROCESSING_MIN_THRESH,
-				 threshMax = PROCESSING_MAX_THRESH,
+				 threshMinH = PROCESSING_MIN_THRESH_H,
+				 threshMinS = PROCESSING_MIN_THRESH_S,
+				 threshMinV = PROCESSING_MIN_THRESH_V,
+				 threshMaxH = PROCESSING_MAX_THRESH_H,
+				 threshMaxS = PROCESSING_MAX_THRESH_S,
+				 threshMaxV = PROCESSING_MAX_THRESH_V,
 				 medianBlue = PROCESSING_MEDIAN_BLUR,
 				 erosionSize = PROCESSING_EROSION_SIZE,
 				 minArea = PROCESSING_MIN_AREA,
@@ -92,8 +103,9 @@ namespace processing {
 				 minPerim = PROCESSING_MIN_PERIM,
 				 maxPerim = PROCESSING_MAX_PERIM,
 				 midYMin = PROCESSING_MID_MIN_Y,
-				 midYMax = PROCESSING_MID_MAX_Y,
-				 depthYOffset = PROCESSING_DEPTH_Y_OFFSET;
+				 midYMax = PROCESSING_MID_MAX_Y;
+				//OLDSRC 
+				//depthYOffset = PROCESSING_DEPTH_Y_OFFSET;
 
 	float maxHeight = PROCESSING_MAX_HEIGHT,
 		  widthRatio = PROCESSING_WIDTH_RATIO;
@@ -104,17 +116,20 @@ namespace processing {
 		Logger::Log(PROCESSING_LOG_TAG, SW(toLog), error);
 	}
 
-	void kinectDepth2Mat(cv::Mat &frame, const kinect::DepthData &depth, const float maxDepth) {
+	/*void kinectDepth2Mat(cv::Mat &frame, const kinect::DepthData &depth, const float maxDepth) {
 		frame = cv::Mat(depth.height, depth.width, CV_32FC1, depth.depthRaw) / maxDepth;
 	}
 
 	void kinectScalar(cv::Mat &frame, cv::Mat &newFrame) {
 		frame.convertTo(newFrame, CV_8UC3);
-	}
+	}*/
 
-	void preProcessing(cv::Mat frame, cv::Mat &newFrame) {
+	void preProcessing(cv::Mat &frame, cv::Mat &newFrame) {
 		//Inversed binary thresh. It's easier to view the target
-		cv::threshold(frame, newFrame, threshMin, threshMax, CV_THRESH_BINARY_INV);
+		//cv::threshold(frame, frame, threshMin, threshMax, CV_THRESH_BINARY_INV);
+		cv::cvtColor(frame, frame, CV_BGR2HSV);
+		cv::inRange(frame, cv::Scalar(threshMinH, threshMinS, threshMinV), 
+						cv::Scalar(threshMaxH, threshMaxS, threshMaxV), newFrame);
 
 		//Blur the threshed image to remove random depth static
 		cv::medianBlur(newFrame, newFrame, PROCESSING_MEDIAN_BLUR);
@@ -124,10 +139,10 @@ namespace processing {
 					2 * erosionSize + 1),cv::Point(erosionSize, erosionSize));
 
 		//Apply erode method
-		cv::erode(newFrame, newFrame, eroder);
+		cv::dilate(newFrame, newFrame, eroder);
 	}
 
-	void processFrame(cv::Mat &frame, kinect::DepthData &depthData, std::vector<Target> &targets) {
+	void processFrame(cv::Mat &frame, std::vector<Target> &targets) {
 
 		//Create the contour hierarchical status
 		std::vector<std::vector<cv::Point>> contours;
@@ -137,6 +152,8 @@ namespace processing {
 		cv::findContours(frame, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_SIMPLE);
 
 		unsigned int ind = 0; //Set contour count
+
+		cv::Mat drawing = cv::Mat::zeros(frame.size(), CV_8UC3);
 
 		//Loop through each contour found
 		for(std::vector<cv::Point> contour : contours) {
@@ -188,8 +205,8 @@ namespace processing {
 							if(contour_y >= midYMin && contour_y <= midYMax) {
 
 								//Get current contour depth
-								int contour_depth = depthData.getDepth(&frame, contour_x, (contour_y + depthYOffset));
-
+								//int contour_depth = depthData.getDepth(&frame, contour_x, (contour_y + depthYOffset));
+								
 								//Add contour to possible target object
 								Target target;
 								target.area = contour_area;
@@ -199,7 +216,11 @@ namespace processing {
 								target.sides = contour_sides;
 								target.x = contour_x;
 								target.y = contour_y;
-								target.depth = contour_depth;
+								//target.depth = contour_depth;
+
+							cv::Scalar color = cv::Scalar(255, 0, 0);
+							cv::drawContours(drawing, contours, ind, color, 2, 8, hierarchy, 0, cv::Point());
+							cv::putText(drawing, boost::lexical_cast<std::string>(ind), cv::Point(contour_x, (mu.m01 / mu.m00)), CV_FONT_HERSHEY_PLAIN, 2, cv::Scalar(255, 255, 255));
 
 								//Add current target to target calculation list
 								targets.push_back(target);
@@ -211,6 +232,8 @@ namespace processing {
 
 				}
 			}
+
+			cv::imshow("contours", drawing);
 
 			ind++; //Add to current contour index
 		}

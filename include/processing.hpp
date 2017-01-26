@@ -62,7 +62,8 @@
 #include <networktables/NetworkTable.h>
 
 //PERCEPTION INCLUDES
-#include "kinect.hpp"
+//OLDSRC
+//#include "kinect.hpp"
 #include "log.hpp"
 
 #ifndef INCLUDE_PROCESSING_HPP_
@@ -83,10 +84,12 @@ namespace processing {
 	template<typename T>
 	void inline PLOG(T, bool error = false);
 
-	void kinectDepth2Mat(cv::Mat &, const kinect::DepthData &, const float);
-	void kinectScalar(cv::Mat &, cv::Mat &);
-	void preProcessing(cv::Mat, cv::Mat &);
-	void processFrame(cv::Mat &, kinect::DepthData &, std::vector<Target> &);
+	//OLDSRC
+	//void kinectDepth2Mat(cv::Mat &, const kinect::DepthData &, const float);
+	//void kinectScalar(cv::Mat &, cv::Mat &);
+
+	void preProcessing(cv::Mat &, cv::Mat &);
+	void processFrame(cv::Mat &, std::vector<Target> &);
 	void settingsUpdate(std::shared_ptr<NetworkTable>);
 } /* namespace processing */
 
