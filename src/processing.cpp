@@ -36,43 +36,13 @@
 
 #include "../include/processing.hpp"
 
-//Settings definitions
-#define PROCESSING_LOG_TAG			"PROCER"
-#define PROCESSING_LOOP_TIME		2000 //Milliseconds to delay between each setting loop
-#define PROCESSING_LOOP_TAG			"proc_time" //Network table processing tag
+/*
+ * Everything labeled OLDSRC is for the kinect version of the code
+ * which is currently deprecated, if other teams want to try it out
+ * just uncomment the OLDSRC headed parts.
+ */
 
-//PreProcessing definitions
-#define PROCESSING_MIN_THRESH_H 	36 //Minimum float converted value for the depth stream
-#define PROCESSING_MIN_THRESH_S 	0 //Maximum float converted value for the depth stream
-#define PROCESSING_MIN_THRESH_V		99
-
-#define PROCESSING_MAX_THRESH_H		180
-#define PROCESSING_MAX_THRESH_S		255
-#define PROCESSING_MAX_THRESH_V		255
-
-#define PROCESSING_MEDIAN_BLUR		7 //The median blur level (must be an odd number)
-#define PROCESSING_EROSION_SIZE		1 //The erosion size for target detection
-
-//Extra details
-#define PROCESSING_CAMERA_WIDTH		512
-#define PROCESSING_CAMERA_HEIGHT	424
-
-//Processing definitions to check if the contour could be a possible target
-#define PROCESSING_MIN_AREA			20
-#define PROCESSING_MAX_AREA			500
-
-#define PROCESSING_MIN_SIDES		2
-#define PROCESSING_MAX_SIDES		4
-
-#define PROCESSING_MIN_PERIM		25
-#define PROCESSING_MAX_PERIM		200
-
-#define PROCESSING_MAX_HEIGHT		50 //Maximum height of contour in pixels
-#define PROCESSING_WIDTH_RATIO		2.0f //The width to height ratio
-
-#define PROCESSING_MID_MIN_Y		(PROCESSING_CAMERA_HEIGHT / 2) //Minimum pixel height for contour to be in
-#define PROCESSING_MID_MAX_Y		(PROCESSING_CAMERA_HEIGHT - 20) //Maximium pixel height for contour to be in
-
+//OLDSRC
 /*
 //Depth processing and checking
 #define PROCESSING_DEPTH_Y_OFFSET	-20 //Subtract 20 pixels from target center
@@ -81,6 +51,7 @@
 */
 
 
+//Processing namespace (@TODO Split off common functions in separate source files to decrease compile time) 
 namespace processing {
 
 	//Mutex lock for settings
@@ -95,7 +66,7 @@ namespace processing {
 				 threshMaxS = PROCESSING_MAX_THRESH_S,
 				 threshMaxV = PROCESSING_MAX_THRESH_V,
 				 medianBlue = PROCESSING_MEDIAN_BLUR,
-				 erosionSize = PROCESSING_EROSION_SIZE,
+				 dilationSize = PROCESSING_DILATION_SIZE,
 				 minArea = PROCESSING_MIN_AREA,
 				 maxArea = PROCESSING_MAX_AREA,
 				 minSides = PROCESSING_MIN_SIDES,
@@ -135,11 +106,11 @@ namespace processing {
 		cv::medianBlur(newFrame, newFrame, PROCESSING_MEDIAN_BLUR);
 
 		//Smooth back the thicker parts of the image to crisp out the target
-		cv::Mat eroder = cv::getStructuringElement(cv::MORPH_ERODE, cv::Size(2 * erosionSize + 1,
-					2 * erosionSize + 1),cv::Point(erosionSize, erosionSize));
+		cv::Mat dilater = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(2 * dilationSize + 1,
+					2 * dilationSize + 1),cv::Point(dilationSize, dilationSize));
 
 		//Apply erode method
-		cv::dilate(newFrame, newFrame, eroder);
+		cv::dilate(newFrame, newFrame, dilater);
 	}
 
 	void processFrame(cv::Mat &frame, std::vector<Target> &targets) {
@@ -237,6 +208,18 @@ namespace processing {
 
 			ind++; //Add to current contour index
 		}
+	}
+
+	void processTargets(std::vector<Target> targets) {
+		unsigned int target_ind = 0;		
+
+		for(Target target : targets) {
+
+		
+
+			target_ind++;
+		}
+
 	}
 
 	void __settingsLoop(std::shared_ptr<NetworkTable> table) {

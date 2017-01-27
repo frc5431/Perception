@@ -40,6 +40,7 @@
 
 #define PERCEPTION_LOG_TAG "PERCEP" //Logger tag name
 #define PERCEPTION_TABLE_NAME "perception" //The network table name
+#define PERCEPTION_PULL_URL "http://10.54.31.25/mjpg/video.mjpg"
 
 //bool protonect_shutdown = false; // Whether the running application should shut down.
 
@@ -79,6 +80,7 @@ void MLOG(T toLog, bool err = false) {
 	Logger::Log(PERCEPTION_LOG_TAG, toLog, err);
 }
 
+//OLDSRC
 /*
 void onDepthFrame(kinect::DepthData depthData) {
 	//cv::Mat depth, converted, preprocessed;
@@ -97,8 +99,6 @@ void onDepthFrame(kinect::DepthData depthData) {
 		cv::imshow("depth", depthMat);
 		cv::waitKey(1);
 
-		//ERRPR
-		//ERROR
 
 		//std::cout << "DEPTH3: " << threshed.depth() << std::endl;
 		//cv::GaussianBlur(threshed, threshed, cv::Size(5, 5), 1);
@@ -117,21 +117,22 @@ void onDepthFrame(kinect::DepthData depthData) {
 	//MLOG(SW("GOT ") + SW(targets.size()) + SW(" POSSIBLE TARGETS!"));
 }*/
 
-//Main code
-int main() {
+void pullLoop() {
 
-    cv::Mat frame;
-    cv::VideoCapture cap = cv::VideoCapture("http://10.54.31.25/mjpg/video.mjpg");
+	//Camera frame mat and other frames
+	cv::Mat camera_frame, threshed;
+	
+	//Video capture from mjpg stream
+	cv::VideoCapture cap = cv::VideoCapture(PERCEPTION_PULL_URL);
 
-    while(1) {
+	//Set capture properties
+	cap.set(CAP_PROP_FPS, PROCESSING_CAMERA_FPS); 
+
+	//Loop forevet
+	while(1) {
+		//Pull new frame from capture stream (make sure you constantly pull from the buffer)
 		cap >> frame;
-
-		//cv::Mat hsv, threshed;
-
-		//cv::cvtColor(frame, hsv, CV_BGR2HSV);
-
-		//cv::inRange(hsv, cv::Scalar(55, 255, 87), cv::Scalar(72, 255, 188), threshed);
-
+		
 		cv::Mat threshed;
 
 		processing::preProcessing(frame, threshed); 
@@ -156,7 +157,14 @@ int main() {
     }
 
     cv::destroyAllWindows();
+}
 
+
+//Main code
+int main() {
+	pullLoop(); //Start the Mjpg client pullLoop
+
+	//OLDSRC
 	//Start the perception logger
 	/*Logger::Init();
 
@@ -173,13 +181,12 @@ int main() {
 	//Bitwise frame puller example: KINECT_DEPTH | KINECT_COLOR | KINECT_IR
 	kinect.setFrames(KINECT_DEPTH);
 
-    MjpgServer server(8081); // Start server on pot 8081
-    server.setQuality(1); // Set jpeg quality to 1 (0 - 100)
-    server.setRes	Logger::
-	cv::threshold();olution(640, 320); // Set stream resolution to 1280x720
-    server.setFPS(30); // Set target fps to 15
-    server.setMaxConnections(3);
-    server.setName("Perception Server");
+	MjpgServer server(8081); // Start server on port 8081
+	server.setQuality(1); // Set jpeg quality to 1 (0 - 100)
+	server.setResolution(640, 320); // Set stream resolution to 1280x720
+	server.setFPS(30); // Set target fps to 15
+	server.setMaxConnections(3);
+	server.setName("Perception Server");
 	server.attach(pullFrame);
 
 	//Attach the frame callbacks
@@ -188,7 +195,7 @@ int main() {
 
 	//Start the kinect loop
 	kinect.startLoop();
-    //server.run(); //Run stream forever (until fatal)
+	//server.run(); //Run stream forever (until fatal)
 
 	cv::destroyAllWindows();
 
