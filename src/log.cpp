@@ -1,20 +1,22 @@
 #include "../include/log.hpp"
 
-#include <boost/date_time/gregorian/gregorian.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-#include <boost/filesystem.hpp>
-
+//STANDARD INCLUDES
 #include <iostream>
 #include <fstream>
 #include <sstream>
 
-#define PERCEPTION_LOGGER_PRINT "LOGGER"
+//BOOST INCLUDES
+#include <boost/date_time/gregorian/gregorian.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/filesystem.hpp>
 
-#define NO_COLOR "\033[0m"
-#define RED_COLOR "\033[0;31m"
-#define BLUE_COLOR "\033[0;34m"
 
+//Terminal color definitions
+#define NO_COLOR 				"\033[0m"
+#define RED_COLOR 				"\033[0;31m"
+#define BLUE_COLOR 				"\033[0;34m"
 
+//Boost datetime namespaces
 using namespace boost::gregorian;
 using namespace boost::posix_time;
 using namespace boost::filesystem;
@@ -148,6 +150,13 @@ namespace Logger {
 				__saveLog(space, toPrint, error);
 			#endif
 		#endif
+	#endif
+	}
+
+	void LogWindow(const std::string &window_name, cv::Mat &toLog) {
+	#if PERCEPTION_LOG_WINDOWS == true
+		if(toLog.empty()) return; //Skip the window logging if it's blank
+		cv::imshow(window_name, toLog);
 	#endif
 	}
 

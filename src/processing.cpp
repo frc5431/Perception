@@ -87,6 +87,7 @@ namespace processing {
 		Logger::Log(PROCESSING_LOG_TAG, SW(toLog), error);
 	}
 
+	//OLDSRC
 	/*void kinectDepth2Mat(cv::Mat &frame, const kinect::DepthData &depth, const float maxDepth) {
 		frame = cv::Mat(depth.height, depth.width, CV_32FC1, depth.depthRaw) / maxDepth;
 	}
@@ -113,7 +114,7 @@ namespace processing {
 		cv::dilate(newFrame, newFrame, dilater);
 	}
 
-	void processFrame(cv::Mat &frame, std::vector<Target> &targets) {
+	void processFrame(cv::Mat &frame, std::vector<Target> &targets, cv::Mat &contoured) {
 
 		//Create the contour hierarchical status
 		std::vector<std::vector<cv::Point>> contours;
@@ -124,7 +125,7 @@ namespace processing {
 
 		unsigned int ind = 0; //Set contour count
 
-		cv::Mat drawing = cv::Mat::zeros(frame.size(), CV_8UC3);
+		contoured = cv::Mat::zeros(frame.size(), CV_8UC3);
 
 		//Loop through each contour found
 		for(std::vector<cv::Point> contour : contours) {
@@ -170,14 +171,18 @@ namespace processing {
 
 							//Get the mass center of the contour for both X and Y
 							unsigned int contour_x = (mu.m10 / mu.m00);
-							unsigned int contour_y = PROCESSING_CAMERA_HEIGHT - (mu.m01 / mu.m00);
+							unsigned int r_contour_y = (mu.m01 / mu.m00);
+							unsigned int contour_y = PROCESSING_CAMERA_HEIGHT - r_contour_y;
 
 							//Check to see if the contour is within our region of interest
 							if(contour_y >= midYMin && contour_y <= midYMax) {
 
+								//OLDSRC
 								//Get current contour depth
 								//int contour_depth = depthData.getDepth(&frame, contour_x, (contour_y + depthYOffset));
 								
+								std::cout << "FOUND SOME CONTOURS" << std::endl;
+
 								//Add contour to possible target object
 								Target target;
 								target.area = contour_area;
@@ -187,11 +192,14 @@ namespace processing {
 								target.sides = contour_sides;
 								target.x = contour_x;
 								target.y = contour_y;
+
+								//OLDSRC
 								//target.depth = contour_depth;
 
-							cv::Scalar color = cv::Scalar(255, 0, 0);
-							cv::drawContours(drawing, contours, ind, color, 2, 8, hierarchy, 0, cv::Point());
-							cv::putText(drawing, boost::lexical_cast<std::string>(ind), cv::Point(contour_x, (mu.m01 / mu.m00)), CV_FONT_HERSHEY_PLAIN, 2, cv::Scalar(255, 255, 255));
+								cv::Scalar color = cv::Scalar(255, 0, 0);
+								cv::drawContours(contoured, contours, ind, color, 2, 8, hierarchy, 0, cv::Point());
+								cv::putText(contoured, boost::lexical_cast<std::string>(ind), cv::Point(contour_x, r_contour_y),
+									CV_FONT_HERSHEY_PLAIN, 2, cv::Scalar(255, 255, 255));
 
 								//Add current target to target calculation list
 								targets.push_back(target);
@@ -204,18 +212,48 @@ namespace processing {
 				}
 			}
 
-			cv::imshow("contours", drawing);
-
 			ind++; //Add to current contour index
 		}
 	}
 
-	void processTargets(std::vector<Target> targets) {
-		unsigned int target_ind = 0;		
+	void processTargets(std::vector<Target> &targets) {
+		unsigned int target_ind = 0, secondary_ind = 0;
+
+		float differencial_calculation = PROCESSING_TAPE_VERT_DIFF / PROCESSING_TAPE_WIDTH;
+		//@TODO add height differential calculation as a secondary check to the width ratio since the target might be temporarily cut off
+
+		bool target_found = false;
 
 		for(Target target : targets) {
+			secondary_ind =0;
 
-		
+			for(Target second_target : targets) {
+
+				//Don't continue the loop since the target widths are different and that the first target is higher than the other and if they're near the same X pixel location
+				if(fabs(target.width - second_target.width) < PROCESSING_WIDTH_FIX_DIFF &&
+						target.y > second_target.y && fabs(target.x - target.y) < PROCESSING_OFFSET_FIX_DIFF) {
+
+					//Absolute target vertical differential
+					float height_differential = fabs(target.width * differencial_calculation); //Width to wanted height in pixels
+					float target_differential = fabs(target.y - second_target.y); //Get current target height difference
+
+					//Get the current difference between the real height and calculated height
+					float calculated_differential = fabs(height_differential - target_differential);
+
+					//If the differential is within our error limit then we have found both retro reflective tape targets
+					if((calculated_differential) < PROCESSING_WIDTH_FIX_DIFF) {
+						std::cout << "FOUND TARGET PAIRS ONE: " << target_ind << " TWO: " << secondary_ind << std::endl;
+						target_found = true;
+						break; //Break out of this for loop
+					}
+
+				}
+
+				secondary_ind++;
+			}
+
+			//Break out of loop since target has been found
+			if(target_found) break;
 
 			target_ind++;
 		}
@@ -224,7 +262,6 @@ namespace processing {
 
 	void __settingsLoop(std::shared_ptr<NetworkTable> table) {
 		while(1) {
-
 			try {
 
 				//Scoped mutex lock

@@ -57,6 +57,7 @@
 #include <functional>
 #include <memory>
 #include <vector>
+#include <cmath>
 
 //NTCORE INCLUDES
 #include <networktables/NetworkTable.h>
@@ -113,6 +114,14 @@
 #define PROCESSING_MID_MIN_Y		(PROCESSING_CAMERA_HEIGHT / 2) //Minimum pixel height for contour to be in
 #define PROCESSING_MID_MAX_Y		(PROCESSING_CAMERA_HEIGHT - 20) //Maximium pixel height for contour to be in
 
+//Double tape detection and ratio calculations
+#define PROCESSING_TAPE_WIDTH		20.0f //How many inches wide is the real tape
+#define PROCESSING_TAPE_HEIGHT		2.0f //How many inches tall is the tape
+#define PROCESSING_TAPE_VERT_DIFF	11.0f //The vertical inches differential between the tapes
+#define PROCESSING_TAPE_FIX_DIFF	20 //The amount of pixels (vertically) to accommodate for the errors in the height differential
+#define PROCESSING_WIDTH_FIX_DIFF	100 //The amount of pixel width differential allowed between the higher and lower object
+#define PROCESSING_OFFSET_FIX_DIFF	30 //The amount of pixels difference allowed in the x coordinate location (offsets)
+
 //Declare processing namespace
 namespace processing {
 
@@ -131,7 +140,7 @@ namespace processing {
 	//void kinectScalar(cv::Mat &, cv::Mat &);
 
 	void preProcessing(cv::Mat &, cv::Mat &);
-	void processFrame(cv::Mat &, std::vector<Target> &);
+	void processFrame(cv::Mat &, std::vector<Target> &, cv::Mat &);
 	void settingsUpdate(std::shared_ptr<NetworkTable>);
 } /* namespace processing */
 

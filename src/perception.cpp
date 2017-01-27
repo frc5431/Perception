@@ -1,46 +1,41 @@
-//STANDARD C INCLUDES
-#include <stdio.h>
-#include <iomanip>
-#include <time.h>
-#include <signal.h>
+/*------------------------------------------------------------------------------||
+|                                                                                |
+| Copyright (C) 2017 by Titan Robotics                                           |
+| License Date: 01/23/2017                                                       |
+| Modifiers: none                                                                |
+|                                                                                |
+| Permission is hereby granted, free of charge, to any person obtaining a copy   |
+| of this software and associated documentation files (the "Software"), to deal  |
+| in the Software without restriction, including without limitation the rights   |
+| to use, copy, modify, merge, publish, distribute, sublicense, and/or sell      |
+| copies of the Software, and to permit persons to whom the Software is          |
+| furnished to do so, subject to the following conditions:                       |
+|                                                                                |
+| The above copyright notice and this permission notice shall be included in all |
+| copies or substantial portions of the Software.                                |
+|                                                                                |
+| THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR     |
+| IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,       |
+| FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE    |
+| AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER         |
+| LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,  |
+| OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE  |
+| SOFTWARE.                                                                      |
+|                                                                                |
+||------------------------------------------------------------------------------*/
 
-//STANDARD C++ INCLUDES
-#include <iostream>
-#include <memory>
+/**
+ *
+ * @file perception.cpp
+ * @date 01/23/2017
+ * @brief Source that includes the main functions for perception
+ *
+ * @details This source compiles all the processing for perception and it's libraries
+ * the main function should only ever call abstracted functions to start perception for
+ * quick portability and it's easier to read.
+ */
 
-//PERCEPTION INLCUDES
-//OLDSRC
-//#include "../include/kinect.hpp"
-#include "../include/log.hpp"
-//OLDSRC
-//#include "../include/mjpgserver.hpp"
-#include "../include/processing.hpp"
-
-//BOOST INCLUDES
-#include <boost/lexical_cast.hpp>
-
-//OPENCV INCLUDES
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/videoio/videoio.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/features2d/features2d.hpp>
-
-//LIBFREENECT INCLUDES (OLDSRC)
-/*
-#include <libfreenect2/libfreenect2.hpp>
-#include <libfreenect2/frame_listener_impl.h>
-#include <libfreenect2/registration.h>
-#include <libfreenect2/packet_pipeline.h>
-#include <libfreenect2/logger.h>
-*/
-
-//WPILIB INCLUDES
-#include <networktables/NetworkTable.h>
-
-#define PERCEPTION_LOG_TAG "PERCEP" //Logger tag name
-#define PERCEPTION_TABLE_NAME "perception" //The network table name
-#define PERCEPTION_PULL_URL "http://10.54.31.25/mjpg/video.mjpg"
+#include "../include/perception.hpp"
 
 //bool protonect_shutdown = false; // Whether the running application should shut down.
 
@@ -55,11 +50,6 @@
 	if(rgbMat.empty()) return defaultMat;
 	return rgbMat;
 }*/
-
-
-
-//Image dimensions
-float xSize = 512.0f, ySize = 424.0f;
 
 //Network Tables
 std::shared_ptr<NetworkTable> table;
@@ -120,30 +110,32 @@ void onDepthFrame(kinect::DepthData depthData) {
 void pullLoop() {
 
 	//Camera frame mat and other frames
-	cv::Mat camera_frame, threshed;
+	cv::Mat camera_frame, threshed, contoured;
 	
 	//Video capture from mjpg stream
-	cv::VideoCapture cap = cv::VideoCapture(PERCEPTION_PULL_URL);
+	cv::VideoCapture axis_camera = cv::VideoCapture(0); //cv::VideoCapture(PERCEPTION_PULL_URL);
 
 	//Set capture properties
-	cap.set(CAP_PROP_FPS, PROCESSING_CAMERA_FPS); 
+	axis_camera.set(CV_CAP_PROP_FPS, PROCESSING_CAMERA_FPS);
 
 	//Loop forevet
 	while(1) {
 		//Pull new frame from capture stream (make sure you constantly pull from the buffer)
-		cap >> frame;
+		axis_camera.read(camera_frame);
 		
+		Logger::LogWindow("Original", camera_frame);
+
 		cv::Mat threshed;
 
-		processing::preProcessing(frame, threshed); 
+		processing::preProcessing(camera_frame, threshed);
 
 		std::vector<processing::Target> targets;
 
-		processing::processFrame(threshed, targets);
+		processing::processFrame(threshed, targets, contoured);
 
 		unsigned int target_ind = 0;
 
-		std::cout << "POSSIBLE TARGETS FOUND: " << targets.size() << std::endl;
+		//std::cout << "POSSIBLE TARGETS FOUND: " << targets.size() << std::endl;
 
 		for(processing::Target target : targets) {
 			std::cout << "IND: " << target_ind << "\n	AREA: "
@@ -151,8 +143,12 @@ void pullLoop() {
 			target_ind++;
 		}
 
-		cv::imshow("image", threshed);
-		if(cv::waitKey(30) >= 255) break;
+		Logger::LogWindow("Threshed", threshed);
+		Logger::LogWindow("Contours", contoured);
+
+		cv::waitKey(30);
+
+		//if(cv::waitKey(30) >= 255) break;
 
     }
 

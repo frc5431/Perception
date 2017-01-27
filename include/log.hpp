@@ -1,11 +1,16 @@
+//STANDARD INCLUDES
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
 #include <cstdarg>
 
-#define PERCEPTION_BASE "/vision/"
+//OPENCV INCLUDES
+#include <opencv2/core.hpp>
+#include <opencv2/highgui.hpp>
 
-#define PERCEPTION_LOGGER_PRINT "LOGGER"
+
+#define PERCEPTION_BASE 					"/vision/"
+#define PERCEPTION_LOGGER_PRINT 			"LOGGER"
 
 #define SLOG_INIT() Logger::Init()
 #define SLOG_PRINT(X) Logger::Log(X)
@@ -15,7 +20,7 @@
 #ifndef PERCEPTION_LOG_TEE
 
 //Default operation is to print both to file and console
-#define PERCEPTION_LOG_TEE 2
+#define PERCEPTION_LOG_TEE 					2
 
 #endif //PERCEPTION_LOG_TEE
 
@@ -24,7 +29,7 @@
 #ifndef PERCEPTION_LOG_DATE
 
 //Default operation is to print the current logged date
-#define PERCEPTION_LOG_DATE true
+#define PERCEPTION_LOG_DATE 				true
 
 #endif
 
@@ -32,8 +37,8 @@
 #if ! defined(PERCEPTION_LOG_NAMESPACE) || ! defined (PERCEPTION_LOG_DEFAULT_NAMESPACE)
 
 //Default operations for namespacing of PERCEPTION log
-#define PERCEPTION_LOG_NAMESPACE true
-#define PERCEPTION_LOG_DEFAULT_NAMESPACE "GENERAL"
+#define PERCEPTION_LOG_NAMESPACE 			true
+#define PERCEPTION_LOG_DEFAULT_NAMESPACE 	"GENERAL"
 
 #endif
 
@@ -41,8 +46,8 @@
 #ifndef PERCEPTION_LOG_LOCATION
 
 //Default log location will be in the log home folder
-#define PERCEPTION_LOG_LOCATION PERCEPTION_BASE "/logs"
-#define PERCEPTION_LOG_LATEST_LOCATION PERCEPTION_LOG_LOCATION "/latest.txt"
+#define PERCEPTION_LOG_LOCATION 			PERCEPTION_BASE "/logs"
+#define PERCEPTION_LOG_LATEST_LOCATION 		PERCEPTION_LOG_LOCATION "/latest.txt"
 
 #endif
 
@@ -50,8 +55,10 @@
 #ifndef PERCEPTION_LOG_H
 #define PERCEPTION_LOG_H
 
-#define SC(X)	#X //Literal converstion
-#define SW(X)	boost::lexical_cast<std::string> (X) //String wrap
+///@brief To debug the perception windows (true show windows, false don't show)
+#define PERCEPTION_LOG_WINDOWS				true
+#define SC(X)								#X //Literal converstion
+#define SW(X)								boost::lexical_cast<std::string> (X) //String wrap
 
 /** @class Logger log.hpp
  * @brief Class to handle all data logs and streams for the PERCEPTION hub
@@ -74,14 +81,14 @@ namespace Logger {
 	 */
 	template<typename T>
 	void Log(T);
-
 	void Log(const char *, const std::string &, bool error=false);
 
 	template<typename T>
 	void LogError(T);
-
 	template<typename T>
 	void LogError(const char *, const T &);
+
+	void LogWindow(const std::string &, cv::Mat &);
 
 	void Free();
 }
