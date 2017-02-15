@@ -54,6 +54,7 @@
 //OLDSRC
 //#include "../include/mjpgserver.hpp"
 #include "processing.hpp"
+#include "tables.hpp"
 
 //BOOST INCLUDES
 #include <boost/lexical_cast.hpp>
@@ -74,11 +75,9 @@
 #include <libfreenect2/logger.h>
 */
 
-//WPILIB INCLUDES
-#include <networktables/NetworkTable.h>
-
 #define PERCEPTION_LOG_TAG 			"PERCEP" //Logger tag name
 #define PERCEPTION_TABLE_NAME 		"perception" //The network table name
 #define PERCEPTION_PULL_URL 		"http://10.54.31.25/mjpg/video.mjpg"
+#define PERCEPTION_MAX_FAIL_COUNT	30 //Maximum empty frame count
 
 #endif /* INCLUDE_PERCEPTION_HPP_ */

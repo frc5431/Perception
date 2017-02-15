@@ -36,7 +36,7 @@
  */
 
 #include "../include/perception.hpp"
-
+#include "../include/gear.hpp"
 //bool protonect_shutdown = false; // Whether the running application should shut down.
 
 
@@ -50,9 +50,6 @@
 	if(rgbMat.empty()) return defaultMat;
 	return rgbMat;
 }*/
-
-//Network Tables
-std::shared_ptr<NetworkTable> table;
 
 //OLDSRC
 /*void onColorFrame(cv::Mat *rgbImage) {
@@ -107,22 +104,64 @@ void onDepthFrame(kinect::DepthData depthData) {
 	//MLOG(SW("GOT ") + SW(targets.size()) + SW(" POSSIBLE TARGETS!"));
 }*/
 
+cv::VideoCapture getCapture() {
+	while(1) {
+		try {
+			cv::VideoCapture cap = cv::VideoCapture(PERCEPTION_PULL_URL);
+
+			if(cap.isOpened()) return cap;
+		} catch(const cv::Exception &err) {
+			std::cout << "Failed initializing capture!" << std::endl;
+		} catch(const std::exception &err) {
+			std::cout << "Failed initializing capture!" << std::endl;
+		}
+	}
+}
+
 void pullLoop() {
+	std::cout << "STARTING" << std::endl;
+
+	boost::thread(Table::init);	
 
 	//Camera frame mat and other frames
 	cv::Mat camera_frame, threshed, contoured;
 	
 	//Video capture from mjpg stream
-	cv::VideoCapture axis_camera = cv::VideoCapture(0); //cv::VideoCapture(PERCEPTION_PULL_URL);
+	cv::VideoCapture axis_camera = getCapture();
 
 	//Set capture properties
 	axis_camera.set(CV_CAP_PROP_FPS, PROCESSING_CAMERA_FPS);
 
+	unsigned long empty_frame_count = 0;
+
 	//Loop forevet
 	while(1) {
+		//table->GetNumber("OK", 0.0);
+
 		//Pull new frame from capture stream (make sure you constantly pull from the buffer)
 		axis_camera.read(camera_frame);
-		
+
+		bool passed = true;
+
+		if(camera_frame.empty()) {
+			empty_frame_count++;
+			std::cout << "empty frame" << std::endl;
+			passed = false;
+		}
+
+		if(empty_frame_count > PERCEPTION_MAX_FAIL_COUNT) {
+			axis_camera = getCapture();
+			
+			empty_frame_count = 0;
+			
+			continue;
+		}
+
+		if(!passed) {
+			cv::waitKey(1);
+			continue;
+		}
+
 		Logger::LogWindow("Original", camera_frame);
 
 		cv::Mat threshed;
@@ -137,16 +176,25 @@ void pullLoop() {
 
 		//std::cout << "POSSIBLE TARGETS FOUND: " << targets.size() << std::endl;
 
-		for(processing::Target target : targets) {
+		/*for(processing::Target target : targets) {
 			std::cout << "IND: " << target_ind << "\n	AREA: "
-			<< target.area << "\n	WIDTH: " << target.width << "\n	HEIGHT: " << target.height << "\n	PERIM: " << target.perim << "\n	X: " << target.x << "\n	Y: " << target.y << std::endl;
+			<< target.area << "\n	WIDTH: " << target.width 
+			<< "\n	HEIGHT: " << target.height << "\n	PERIM: " 
+			<< target.perim << "\n	X: " << target.x << "\n	Y: " 
+			<< target.y << "\n	SIDES: " << target.sides << std::endl;
 			target_ind++;
-		}
+		}*/
+
+		processing::Target final_target;
+
+		processing::processTargets(targets, final_target);
+
+		Table::updateTarget(final_target);
 
 		Logger::LogWindow("Threshed", threshed);
 		Logger::LogWindow("Contours", contoured);
 
-		cv::waitKey(30);
+		cv::waitKey(20);
 
 		//if(cv::waitKey(30) >= 255) break;
 
